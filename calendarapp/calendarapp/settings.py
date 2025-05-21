@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'calendarapp',
     'calendario',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

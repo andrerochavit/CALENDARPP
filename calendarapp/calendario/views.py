@@ -1,6 +1,6 @@
 from rest_framework import viewsets, generics, permissions
-from .models import Post, Comentario, User, Aluno, Professor, Materia, Curso
-from .serializers import PostSerializer, ComentarioSerializer, UserCreateSerializer, AlunoSerializer, ProfessorSerializer, CursoSerializer
+from .models import Post, Comentario, User, Aluno, Professor, Materia, Curso, Tag
+from .serializers import PostSerializer, ComentarioSerializer, UserCreateSerializer, AlunoSerializer, ProfessorSerializer, CursoSerializer, MateriaSerializer, TagSerializer
 
 from django.db.models.functions import TruncDate
 from django.db.models import Count
@@ -42,13 +42,20 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         curso = self.request.data.get('curso')
         materia = self.request.data.get('materia')
-
+        visibilidade = 'PUBLICO'
+        
         if materia:
             visibilidade = 'MATERIA'
         elif curso:
             visibilidade = 'CURSO'
-        else:
-            visibilidade = 'PUBLICO'
+
+        serializer.save(
+            autor=self.request.user,
+            visibilidade=visibilidade,
+            curso_id=curso if curso else None,
+            materia_id=materia if materia else None
+        )
+
 
         serializer.save(autor=self.request.user, visibilidade=visibilidade)
 
@@ -79,6 +86,21 @@ class AlunoViewSet(viewsets.ModelViewSet):
 class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class ProfessorViewSet(viewsets.ModelViewSet):
+    queryset = Professor.objects.all()
+    serializer_class = ProfessorSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class MateriaViewSet(viewsets.ModelViewSet):
+    queryset = Materia.objects.all()
+    serializer_class = MateriaSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class RegisterUserView(generics.CreateAPIView):
